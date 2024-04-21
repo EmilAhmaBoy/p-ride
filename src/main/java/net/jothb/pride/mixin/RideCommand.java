@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.function.Supplier;
+
 @Debug(export = true)
 @Mixin(net.minecraft.server.command.RideCommand.class)
 public class RideCommand {
@@ -33,7 +35,9 @@ public class RideCommand {
             rider.startRiding(vehicle);
 
             ((ServerPlayerEntity) vehicle).networkHandler.sendPacket(new EntityPassengersSetS2CPacket(vehicle));
-            source.sendFeedback(Text.translatable("commands.ride.mount.success", rider.getDisplayName(), vehicle.getDisplayName()), true);
+            Entity finalRider = rider;
+            Supplier<Text> feedbackSupplier = () -> Text.translatable("commands.ride.mount.success", finalRider.getDisplayName(), vehicle.getDisplayName());
+            source.sendFeedback(feedbackSupplier, true);
         }
         cir.setReturnValue(1);
     }
